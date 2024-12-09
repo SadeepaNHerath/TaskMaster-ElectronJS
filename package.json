@@ -1,0 +1,22 @@
+{
+  "name": "demo",
+  "version": "0.0.1",
+  "description": "First Project",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "test",
+    "package-win": "electron-packager . ToDoApp --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "author": "Sadeepa Herath",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  }
+}

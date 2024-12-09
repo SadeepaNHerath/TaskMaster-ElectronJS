@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Enhanced Todo App</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Todo App</h1>
+      
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+        <span id="completion-percentage">0% Complete</span>
+      </div>
+
+      <div class="search-sort-container">
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search todos..."
+          class="search-input"
+        >
+        <select id="sort-select" class="sort-select">
+          <option value="date">Sort by Date</option>
+          <option value="priority">Sort by Priority</option>
+          <option value="alphabetical">Sort by Name</option>
+          <option value="dueDate">Sort by Due Date</option>
+        </select>
+      </div>
+
+      <form id="todo-form" class="todo-form">
+        <input 
+          type="text" 
+          id="todo-input" 
+          placeholder="What needs to be done?"
+          required
+        >
+        <select id="priority-select" class="priority-select">
+          <option value="low">Low Priority</option>
+          <option value="medium" selected>Medium Priority</option>
+          <option value="high">High Priority</option>
+        </select>
+        <button type="submit">Add Todo</button>
+      </form>
+
+      <div class="todo-filters">
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="active">Active</button>
+        <button data-filter="completed">Completed</button>
+        <button data-filter="high-priority">High Priority</button>
+      </div>
+
+      <ul id="todo-list" class="todo-list"></ul>
+
+      <div class="todo-stats">
+        <span id="items-left">0 items left</span>
+        <button id="clear-completed">Clear completed</button>
+      </div>
+    </div>
+    <script type="module" src="renderer.js"></script>
+  </body>
+</html>
