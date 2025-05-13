@@ -1,22 +1,55 @@
 {
-  "name": "demo",
-  "version": "0.0.1",
-  "description": "First Project",
+  "name": "taskmaster",
+  "version": "1.1.0",
+  "description": "Professional Task Management Application with ElectronJS",
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "test": "test",
-    "package-win": "electron-packager . ToDoApp --platform=win32 --arch=x64 --out=dist --overwrite"
+    "dev": "NODE_ENV=development electron .",
+    "dev-win": "set NODE_ENV=development& electron .",
+    "web": "npx http-server -o index-web.html",
+    "test": "jest",
+    "package-win": "electron-builder --win --x64",
+    "package-mac": "electron-builder --mac",
+    "package-linux": "electron-builder --linux",
+    "publish": "electron-builder --publish always"
   },
   "author": "Sadeepa Herath",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^33.2.1",
+    "electron": "^36.2.0",
+    "electron-builder": "^24.13.3",
     "electron-packager": "^17.1.2"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
     "@capacitor/cli": "^6.2.0",
-    "@capacitor/core": "^6.2.0"
+    "@capacitor/core": "^6.2.0",
+    "electron-log": "^5.4.0",
+    "electron-store": "^10.0.1",
+    "electron-updater": "^6.6.2"
+  },
+  "build": {
+    "appId": "com.icet.taskmaster",
+    "productName": "TaskMaster",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    }
   }
 }

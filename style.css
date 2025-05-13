@@ -11,11 +11,19 @@
   --background-color: #f0f2f5;
   --card-background: #ffffff;
   --text-color: #2c3e50;
+  --border-color: #e1e8ed;
+  --input-background: #ffffff;
   --border-radius: 12px;
   --transition-speed: 0.3s;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+  
+  --dark-background-color: #1f1f1f;
+  --dark-card-background: #2d2d2d;
+  --dark-text-color: #e4e4e4;
+  --dark-border-color: #3a3a3a;
+  --dark-input-background: #3a3a3a;
 }
 
 body {
@@ -41,7 +49,6 @@ body {
   animation: slideIn 0.5s ease-out;
 }
 
-/* Progress Bar */
 .progress-container {
   background-color: #f0f0f0;
   border-radius: 10px;
@@ -67,7 +74,6 @@ body {
   color: var(--text-color);
 }
 
-/* Search and Sort Container */
 .search-sort-container {
   display: flex;
   gap: 1rem;
@@ -96,6 +102,66 @@ body {
   background-color: white;
   cursor: pointer;
   font-size: 0.875rem;
+}
+
+body.dark-mode {
+  background-color: var(--dark-background-color);
+  color: var(--dark-text-color);
+}
+
+body.dark-mode .container {
+  background-color: var(--dark-card-background);
+  box-shadow: var(--shadow-lg);
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode button:not(.todo-delete):not([type="submit"]):not(.theme-toggle) {
+  background-color: var(--dark-input-background);
+  border-color: var(--dark-border-color);
+  color: var(--dark-text-color);
+}
+
+body.dark-mode .todo-item {
+  background-color: var(--dark-card-background);
+  border-color: var(--dark-border-color);
+}
+
+body.dark-mode .todo-tag,
+body.dark-mode .category-badge {
+  background-color: var(--dark-border-color);
+  color: var(--dark-text-color);
+}
+
+body.dark-mode .progress-container {
+  background-color: #333;
+}
+
+body.dark-mode .todo-date,
+body.dark-mode #completion-percentage,
+body.dark-mode #items-left {
+  color: #999;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 1.5rem;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+body.dark-mode .theme-toggle {
+  color: var(--dark-text-color);
+}
+
+.theme-toggle:hover {
+  transform: rotate(15deg);
 }
 
 /* Animations */
@@ -144,7 +210,8 @@ h1 {
 }
 
 .todo-form input,
-.priority-select {
+.priority-select,
+.category-select {
   padding: 1rem;
   border: 2px solid #e1e8ed;
   border-radius: var(--border-radius);
@@ -294,6 +361,16 @@ h1 {
   font-weight: 500;
 }
 
+.category-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #3498db;
+  color: white;
+  margin-left: 0.5rem;
+}
+
 .todo-date {
   font-size: 0.75rem;
   color: #666;
@@ -358,6 +435,27 @@ h1 {
   border-top: 2px solid #e1e8ed;
   color: #64748b;
   font-size: 0.875rem;
+}
+
+.actions-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  font-size: 0.875rem;
+}
+
+.action-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 #clear-completed {

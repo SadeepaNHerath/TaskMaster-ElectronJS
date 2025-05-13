@@ -21,34 +21,42 @@ function createElement(tag, className, text = '') {
 }
 
 const storage = {
-  get(key, defaultValue = null) {
+  async get(key, defaultValue = null) {
     try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
+      return await window.electron.store.get(key) || defaultValue;
     } catch (e) {
-      console.error('Error reading from localStorage:', e);
+      console.error('Error reading from store:', e);
       return defaultValue;
     }
   },
 
-  set(key, value) {
+  async set(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      return await window.electron.store.set(key, value);
     } catch (e) {
-      console.error('Error writing to localStorage:', e);
+      console.error('Error writing to store:', e);
     }
   }
 };
 
 class TodoList {
   constructor() {
-    this.todos = storage.get('todos', []);
+    this.todos = [];
     this.filter = 'all';
     this.searchTerm = '';
     this.sortBy = 'date';
+    
+    this.loadTodos();
+  }
+  
+  async loadTodos() {
+    this.todos = await storage.get('todos', []);
+    if (todoUI) {
+      todoUI.renderTodos();
+    }
   }
 
-  addTodo(text, priority = 'medium') {
+  addTodo(text, priority = 'medium', category = 'default') {
     const todo = {
       id: Date.now(),
       text,
@@ -56,7 +64,8 @@ class TodoList {
       priority,
       createdAt: new Date().toISOString(),
       dueDate: null,
-      tags: []
+      tags: [],
+      category
     };
     this.todos.unshift(todo);
     this.save();
@@ -128,6 +137,11 @@ class TodoList {
         filteredTodos = filteredTodos.filter(todo => todo.priority === 'high');
         break;
     }
+    
+    if (this.filter.startsWith('category-')) {
+      const category = this.filter.replace('category-', '');
+      filteredTodos = filteredTodos.filter(todo => todo.category === category);
+    }
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
@@ -152,7 +166,7 @@ class TodoList {
           return new Date(a.dueDate) - new Date(b.dueDate);
         });
         break;
-      default: // date
+      default:
         filteredTodos.sort((a, b) => b.id - a.id);
     }
 
@@ -183,38 +197,49 @@ class TodoList {
     return this.todos.filter(todo => todo.completed).length;
   }
 
-  save() {
-    storage.set('todos', this.todos);
+  async save() {
+    await storage.set('todos', this.todos);
   }
 }
 
 class TodoUI {
   constructor(todoList) {
     this.todoList = todoList;
+    this.darkMode = localStorage.getItem('darkMode') === 'true';
     this.initializeElements();
     this.setupEventListeners();
     this.setupSearchDebounce();
+    this.applyTheme();
   }
 
   initializeElements() {
     this.todoForm = document.getElementById('todo-form');
     this.todoInput = document.getElementById('todo-input');
     this.prioritySelect = document.getElementById('priority-select');
+    this.categorySelect = document.getElementById('category-select');
     this.todoListElement = document.getElementById('todo-list');
     this.itemsLeft = document.getElementById('items-left');
     this.clearCompletedBtn = document.getElementById('clear-completed');
     this.searchInput = document.getElementById('search-input');
     this.sortSelect = document.getElementById('sort-select');
     this.progressBar = document.getElementById('progress-bar');
+    this.themeToggle = document.getElementById('theme-toggle');
+    this.exportBtn = document.getElementById('export-todos');
+    this.importBtn = document.getElementById('import-todos');
   }
 
   setupEventListeners() {
+    this.themeToggle.addEventListener('click', () => {
+      this.toggleDarkMode();
+    });
+    
     this.todoForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = this.todoInput.value.trim();
       const priority = this.prioritySelect.value;
+      const category = this.categorySelect.value;
       if (text) {
-        this.todoList.addTodo(text, priority);
+        this.todoList.addTodo(text, priority, category);
         this.todoInput.value = '';
         this.renderTodos();
       }
@@ -283,6 +308,14 @@ class TodoUI {
         this.renderTodos();
       });
     });
+    
+    this.exportBtn.addEventListener('click', () => {
+      this.exportTodos();
+    });
+    
+    this.importBtn.addEventListener('click', () => {
+      this.importTodos();
+    });
   }
 
   setupSearchDebounce() {
@@ -307,12 +340,14 @@ class TodoUI {
     
     this.updateStats();
     this.updateProgressBar();
+    this.updateCategoryFilters();
   }
 
   createTodoElement(todo) {
     const li = createElement('li', `todo-item ${todo.completed ? 'completed' : ''}`);
     li.dataset.id = todo.id;
     li.dataset.priority = todo.priority;
+    li.dataset.category = todo.category || 'default';
 
     const checkbox = createElement('input', 'todo-checkbox');
     checkbox.type = 'checkbox';
@@ -324,6 +359,12 @@ class TodoUI {
     const priorityBadge = createElement('span', `priority-badge ${todo.priority}`);
     priorityBadge.style.backgroundColor = PRIORITY_LEVELS[todo.priority.toUpperCase()].color;
     priorityBadge.textContent = PRIORITY_LEVELS[todo.priority.toUpperCase()].label;
+
+    if (todo.category && todo.category !== 'default') {
+      const categoryBadge = createElement('span', 'category-badge');
+      categoryBadge.textContent = todo.category.charAt(0).toUpperCase() + todo.category.slice(1);
+      textDiv.appendChild(categoryBadge);
+    }
 
     const dateSpan = createElement('span', 'todo-date', formatDate(new Date(todo.createdAt)));
 
@@ -368,7 +409,108 @@ class TodoUI {
     this.progressBar.style.width = `${percentage}%`;
     this.progressBar.style.backgroundColor = percentage === 100 ? '#4CAF50' : '#4a90e2';
   }
+  
+  toggleDarkMode() {
+    this.darkMode = !this.darkMode;
+    localStorage.setItem('darkMode', this.darkMode);
+    this.applyTheme();
+  }
+  
+  applyTheme() {
+    if (this.darkMode) {
+      document.body.classList.add('dark-mode');
+      this.themeToggle.textContent = '🌞';
+    } else {
+      document.body.classList.remove('dark-mode');
+      this.themeToggle.textContent = '🌓';
+    }
+  }
+
+  async exportTodos() {
+    try {
+      const result = await window.electron.data.exportTodos();
+      if (result.success) {
+        this.showNotification('Export Successful', result.message);
+      } else {
+        this.showNotification('Export Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Error exporting todos:', error);
+      this.showNotification('Export Failed', 'An unexpected error occurred');
+    }
+  }
+  
+  async importTodos() {
+    try {
+      const result = await window.electron.data.importTodos();
+      if (result.success) {
+        this.showNotification('Import Successful', result.message);
+        await this.todoList.loadTodos();
+        this.renderTodos();
+      } else {
+        this.showNotification('Import Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Error importing todos:', error);
+      this.showNotification('Import Failed', 'An unexpected error occurred');
+    }
+  }
+  
+  showNotification(title, message) {
+    window.electron.notification.show(title, message);
+  }
+
+  updateCategoryFilters() {
+    const categories = [...new Set(this.todoList.todos.map(todo => todo.category))]
+      .filter(category => category && category !== 'default');
+    
+    document.querySelectorAll('.category-filter').forEach(btn => btn.remove());
+    
+    if (categories.length > 0) {
+      const filtersContainer = document.querySelector('.todo-filters');
+      
+      categories.forEach(category => {
+        const button = createElement('button', 'category-filter');
+        button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        button.dataset.filter = `category-${category}`;
+        
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.todo-filters button').forEach(btn => 
+            btn.classList.remove('active')
+          );
+          button.classList.add('active');
+          this.todoList.setFilter(`category-${category}`);
+          this.renderTodos();
+        });
+        
+        filtersContainer.appendChild(button);
+      });
+    }
+  }
 }
+
+function checkDueReminders() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  todoList.todos.forEach(todo => {
+    if (!todo.completed && todo.dueDate) {
+      const dueDate = new Date(todo.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      if (dueDate <= today) {
+        const status = dueDate < today ? 'overdue' : 'due today';
+        window.electron.notification.show(
+          `Task ${status}!`,
+          `"${todo.text}" is ${status}.`
+        );
+      }
+    }
+  });
+}
+
+setTimeout(checkDueReminders, 3000);
+setInterval(checkDueReminders, 3600000);
 
 const todoList = new TodoList();
 const todoUI = new TodoUI(todoList);

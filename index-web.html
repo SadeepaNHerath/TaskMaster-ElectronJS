@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>TaskMaster</title>
+    <title>TaskMaster Web</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="web-adapter.js"></script>
   </head>
   <body>
     <div class="container">
       <button id="theme-toggle" class="theme-toggle">🌓</button>
-      <h1>TaskMaster</h1>
+      <h1>TaskMaster Web</h1>
       
       <div class="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
@@ -71,6 +73,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="renderer.js"></script>
+    <script src="renderer.js"></script>
   </body>
 </html>
