@@ -16,7 +16,9 @@ A professional task management application built with ElectronJS.
 
 ## Screenshots
 
+![Task Master2](https://github.com/user-attachments/assets/52558aa7-574f-4ad4-8c0c-180927a190b0)
 
+![Task Master1](https://github.com/user-attachments/assets/4d265311-36d9-40e8-beae-1c370dc3c14c)
 
 ## Installation
 
